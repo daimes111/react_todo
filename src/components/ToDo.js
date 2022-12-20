@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export default function ToDo({ todo, completeTodo, deleteTodo }) {
+export default function ToDo({ todo, completeTodo, updateTodo, deleteTodo }) {
     const [showInput, setShowInput] = useState(false)
     return (
         <li className="todo">
@@ -15,8 +15,10 @@ export default function ToDo({ todo, completeTodo, deleteTodo }) {
                 <input
                     style={{ display: showInput ? "block" : "none" }}
                     type="text"
+                    defaultValue={todo.name}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
+                            updateTodo(todo._id, todo.name= e.target.value)
                             setShowInput(!showInput)
                         }
                     }}
@@ -25,10 +27,10 @@ export default function ToDo({ todo, completeTodo, deleteTodo }) {
             </div>
             <input
           type="checkbox"
-          checked={todo.completed}
-        //   onChange={(e) => {
-        //     completeTodo(todo.id, e)
-        //   }}
+          defaultChecked={todo.completed }
+          onChange={() => {
+            updateTodo(todo._id, todo.completed = !todo.completed)
+          }}
         />
             <button
             // checked={todo.completed}

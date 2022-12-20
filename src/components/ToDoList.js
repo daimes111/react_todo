@@ -2,16 +2,16 @@ import { useState, useEffect } from "react"
 import ToDo from "./ToDo"
 
 export default function ToDoList() {
-    const [todoInput, setTodoInput] = useState({
-        name: "",
-        completed: false
-    })
-    const [todos, setTodos] = useState([])
-    const [foundTodo, setFoundTodo] = useState(null)
-    // const [newTodo, setNewTodo] = useState({
+    // const [todoInput, setTodoInput] = useState({
     //     name: "",
     //     completed: false
     // })
+    const [todos, setTodos] = useState([])
+    const [foundTodo, setFoundTodo] = useState(null)
+    const [newTodo, setNewTodo] = useState({
+        name: "",
+        completed: false
+    })
 
 
     const getTodos = async () => {
@@ -48,12 +48,11 @@ export default function ToDoList() {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ ...todoInput })
+                body: JSON.stringify({...newTodo})
             })
             const data = await response.json()
-
             setFoundTodo(data)
-            setTodoInput({
+            setNewTodo({
                 name: "",
                 completed: false
             })
@@ -62,12 +61,30 @@ export default function ToDoList() {
         }
     }
 
-    const completeTodo = (evt, id) => {
-        const todosCopy = [...todos]
-        const indexTodo = todosCopy.findIndex((i) => i.id === id)
-        todosCopy[indexTodo].completed = !todosCopy[indexTodo].completed
-        setTodos([...todosCopy])
+    const updateTodo = async (id, updatedTodo) => {
+    //    console.log(updatedTodo)
+        try {
+            const response = await fetch(`/api/todos/${id}`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({...updatedTodo})
+            })
+            const data = await response.json()
+            // console.log(updatedTodo)
+            setFoundTodo(data) 
+            console.log(updatedTodo)
+        } catch (error) {
+            console.error(error)
+        }
     }
+    // const completeTodo = (evt, id) => {
+    //     const todosCopy = [...todos]
+    //     const indexTodo = todosCopy.findIndex((i) => i.id === id)
+    //     todosCopy[indexTodo].completed = !todosCopy[indexTodo].completed
+    //     setTodos([...todosCopy])
+    // }
 
     const handleSubmit = (evt) => {
         evt.preventDefault()
@@ -76,7 +93,7 @@ export default function ToDoList() {
 
     const handleChange = (evt) => {
         // evt.preventDefault()
-        setTodoInput({ ...todoInput, name: evt.target.value, completed: false })
+        setNewTodo({ ...newTodo, name: evt.target.value, completed: false })
     }
 
     useEffect(() => {
@@ -90,7 +107,7 @@ export default function ToDoList() {
                 <h1>My ToDo List: </h1>
                 <h3>New Item</h3>
                 <input
-                    type="text" name={"name"} onChange={handleChange} value={todoInput.name} />
+                    type="text" name={"name"} onChange={handleChange} value={newTodo.name} />
             </form>
             {todos && todos.length ? (
                 <>
@@ -103,14 +120,16 @@ export default function ToDoList() {
                                     <ToDo
                                         key={todo._id}
                                         todo={todo}
-                                        completeTodo={completeTodo}
+                                        updateTodo={updateTodo}
                                         deleteTodo={deleteTodo}
+                                        // completeTodo={completeTodo}
+
                                     />
                                 )
                             })}
                     </ul>
                     <h1>Completed Items </h1>
-                    {/* <ul className="todoList">
+                    <ul className="todos">
                             {todos
                                 .filter((i) => i.completed)
                                 .map((todo) => {
@@ -118,12 +137,13 @@ export default function ToDoList() {
                                         <ToDo
                                             key={todo._id}
                                             todo={todo}
-                                            completeTodo={completeTodo}
+                                            // completeTodo={completeTodo}
                                             deleteTodo={deleteTodo}
+                                            updateTodo={updateTodo}
                                         />
                                     )
                                 })}
-                        </ul> */}
+                        </ul>
                 </>
             ) : (<h1>Nothing to do but relax!</h1>)}
 
